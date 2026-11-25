@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h1 style="text-align: center; color: #4a148c; font-size: 2.5rem; margin-bottom: 20px;">Performance Comparison
+        Dashboard</h1>
+
+    <div class="card" style="background: linear-gradient(135deg, #ffffff 0%, #f3e5f5 100%);">
+        <h3>Adjust Network Parameters</h3>
+        <form action="/comparison" method="POST"
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Number of Nodes</label>
+                <input type="number" name="nodes" value="{{ nodes|default(30) }}" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Transmission Power (dBm)</label>
+                <input type="number" name="tx_power" value="{{ tx_power|default(10) }}" style="width: 100%;">
+            </div>
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: bold;">Initial Energy (Joules)</label>
+                <input type="number" name="energy" value="{{ energy|default(100) }}" style="width: 100%;">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn" style="height: 40px; flex: 1;">Recalculate Metrics</button>
+                <a id="simulate-link"
+                    href="/smart_controller?nodes={{ nodes|default(30) }}&tx_power={{ tx_power|default(10) }}"
+                    class="btn"
+                    style="height: 40px; display: flex; align-items: center; justify-content: center; text-decoration: none; background: #7b1fa2; flex: 1;">View
+                    Dynamic Simulation</a>
+            </div>
+        </form>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
+        <div class="card">
+            <h3>Reliability Trend (PDR %)</h3>
+            <canvas id="reliabilityChart" height="200"></canvas>
+        </div>
+        <div class="card">
+            <h3>Latency Analysis (ms)</h3>
+            <canvas id="latencyChart" height="200"></canvas>
+        </div>
+        <div class="card">
+            <h3>Energy Consumption (Joules)</h3>
+            <canvas id="energyChart" height="200"></canvas>
+        </div>
+        <div class="card">
+            <h3>Routing Overhead (Pkts)</h3>
+            <canvas id="overheadChart" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top: 30px;">
+        <h3>Standardized Performance Matrix</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid #ddd; background: #f5f5f5;">
+                    <th style="padding: 12px;">Unified Research Metric</th>
+                    <th style="padding: 12px; color: #f44336;">Existing (AODV)</th>
+                    <th style="padding: 12px; color: #4caf50;">Proposed (CoAP)</th>
+                    <th style="padding: 12px;">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="padding: 12px; font-weight: bold;">Packet Delivery Ratio</td>
+                    <td style="padding: 12px;">{{ aodv.delivery_ratio }}%</td>
+                    <td style="padding: 12px;">{{ coap.delivery_ratio }}%</td>
+                    <td style="padding: 12px;"><span style="color: #4caf50; font-weight: bold;">Optimal</span> vs <span
+                            style="color: #ff9800;">Moderate</span></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; font-weight: bold;">End-to-End Latency</td>
+                    <td style="padding: 12px;">{{ aodv.latency }} ms</td>
+                    <td style="padding: 12px;">{{ coap.latency }} ms</td>
+                    <td style="padding: 12px;"><span style="color: #4caf50; font-weight: bold;">Low</span> vs <span
+                            style="color: #f44336;">High</span></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; font-weight: bold;">Energy Consumption</td>
+                    <td style="padding: 12px;">{{ aodv.energy_consumption }} J</td>
+                    <td style="padding: 12px;">{{ coap.energy_consumption }} J</td>
+                    <td style="padding: 12px;"><span style="color: #4caf50; font-weight: bold;">Superior</span> vs <span
+                            style="color: #f44336;">Inefficient</span></td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; font-weight: bold;">CH Selection Accuracy</td>
+                    <td style="padding: 12px;">{{ aodv.accuracy }}%</td>
+                    <td style="padding: 12px;">{{ coap.accuracy }}%</td>
+                    <td style="padding: 12px;"><span style="color: #4caf50; font-weight: bold;">Excellent</span> vs
+                        <span style="color: #ff9800;">Average</span>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 12px; font-weight: bold;">Routing Overhead</td>
+                    <td style="padding: 12px;">{{ aodv.overhead }} pkts</td>
+                    <td style="padding: 12px;">{{ coap.overhead }} pkts</td>
+                    <td style="padding: 12px;"><span style="color: #4caf50; font-weight: bold;">Minimal</span> vs <span
+                            style="color: #f44336;">Heavy</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card" style="margin-top: 30px; background: #e8f5e9; border-left: 5px solid #4caf50;">
+        <h2 style="color: #2e7d32;">Comparative Research Outcome</h2>
+        <p>The <strong>Proposed REST/CoAP Method</strong> demonstrates significant scalability advantages up to
+            <strong>{{ nodes }} nodes</strong>. It maintains a <strong>{{ (coap.delivery_ratio -
+                aodv.delivery_ratio)|round(1) }}% higher Delivery Ratio</strong> while reducing Latency by <strong>{{
+                (aodv.latency - coap.latency)|round(0) }} ms</strong>, confirming its suitability for high-density smart
+            lighting networks.
+        </p>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var performanceTrends = JSON.parse('{{ trends|tojson|safe }}');
+    const chartDefaults = {
+        responsive: true,
+        plugins: { legend: { position: 'bottom' } },
+        scales: {
+            x: { title: { display: true, text: 'Network Size (Number of Nodes)' } },
+            y: { beginAtZero: true }
+        }
+    };
+
+    // 1. Reliability (PDR)
+    new Chart(document.getElementById('reliabilityChart'), {
+        type: 'line',
+        data: {
+            labels: performanceTrends.labels,
+            datasets: [
+                { label: 'AODV PDR %', data: performanceTrends.aodv.map(m => m.delivery_ratio), borderColor: '#f44336', fill: false, tension: 0.1 },
+                { label: 'CoAP PDR %', data: performanceTrends.coap.map(m => m.delivery_ratio), borderColor: '#4caf50', fill: false, tension: 0.1 }
+            ]
+        },
+        options: chartDefaults
+    });
+
+    // 2. Latency
+    new Chart(document.getElementById('latencyChart'), {
+        type: 'line',
+        data: {
+            labels: performanceTrends.labels,
+            datasets: [
+                { label: 'AODV Latency (ms)', data: performanceTrends.aodv.map(m => m.latency), borderColor: '#ff9800', borderDash: [5, 2] },
+                { label: 'CoAP Latency (ms)', data: performanceTrends.coap.map(m => m.latency), borderColor: '#2196f3' }
+            ]
+        },
+        options: chartDefaults
+    });
+
+    // 3. Energy Consumption
+    new Chart(document.getElementById('energyChart'), {
+        type: 'line',
+        data: {
+            labels: performanceTrends.labels,
+            datasets: [
+                { label: 'AODV Energy (J)', data: performanceTrends.aodv.map(m => m.energy_consumption), borderColor: '#e91e63' },
+                { label: 'CoAP Energy (J)', data: performanceTrends.coap.map(m => m.energy_consumption), borderColor: '#00bcd4' }
+            ]
+        },
+        options: chartDefaults
+    });
+
+    // 4. Overhead
+    new Chart(document.getElementById('overheadChart'), {
+        type: 'line',
+        data: {
+            labels: performanceTrends.labels,
+            datasets: [
+                { label: 'AODV Overhead (Pkts)', data: performanceTrends.aodv.map(m => m.overhead), borderColor: '#9c27b0' },
+                { label: 'CoAP Overhead (Pkts)', data: performanceTrends.coap.map(m => m.overhead), borderColor: '#cddc39' }
+            ]
+        },
+        options: chartDefaults
+    });
+</script>
+{% endblock %}

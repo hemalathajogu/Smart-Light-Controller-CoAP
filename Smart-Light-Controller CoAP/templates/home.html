@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div></div>
+    <div style="text-align: right;">
+        <a href="/smart_controller" style="background: #4fc3f7; color: white; padding: 8px 16px; border-radius: 5px; text-decoration: none; font-weight: bold; margin-right: 10px;">Go to Controller</a>
+        <a href="/logout" style="background: #f44336; color: white; padding: 8px 16px; border-radius: 5px; text-decoration: none; font-weight: bold;">Logout</a>
+    </div>
+</div>
+
+<div style="text-align: center; margin-bottom: 50px;">
+    <h1 style="font-size: 3.5rem; color: #4a148c; text-shadow: 2px 2px 4px rgba(0,0,0,0.1);">Smart Lighting Control System</h1>
+    <p style="font-size: 1.2rem; color: #666;">Next-Generation IoT Communication using RESTful CoAP Protocols</p>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+    <div class="card" style="border-left: 10px solid #4a148c;">
+        <div style="font-size: 3rem;">🌐</div>
+        <h2>REST & CoAP</h2>
+        <p>The Constrained Application Protocol (CoAP) is a specialized web transfer protocol for use with constrained nodes and networks. It provides a RESTful interface similar to HTTP but is optimized for machine-to-machine (M2M) applications.</p>
+        <ul style="color: #555; line-height: 1.8;">
+            <li>Low header overhead</li>
+            <li>UDP based reliable transmission</li>
+            <li>Resource discovery support</li>
+            <li>Asynchronous message exchanges</li>
+        </ul>
+    </div>
+
+    <div class="card" style="border-left: 10px solid #7b1fa2;">
+        <div style="font-size: 3rem;">📶</div>
+        <h2>AODV Protocol</h2>
+        <p>The Ad-hoc On-Demand Distance Vector (AODV) algorithm is a routing protocol for mobile ad hoc networks. While popular, it often suffers from high routing overhead and lower energy efficiency in static lighting grids.</p>
+        <ul style="color: #555; line-height: 1.8;">
+            <li>Reactive route discovery</li>
+            <li>Sequence numbers for loop prevention</li>
+            <li>Higher energy consumption</li>
+            <li>Frequent re-clustering overhead</li>
+        </ul>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 40px; background: linear-gradient(135deg, #4a148c 0%, #7b1fa2 100%); color: white;">
+    <h2 style="color: white; text-align: center;">Project Objectives</h2>
+    <div style="display: flex; justify-content: space-around; text-align: center; padding: 20px;">
+        <div>
+            <div style="font-size: 2.5rem;">🎯</div>
+            <p>High Accuracy CH Selection</p>
+        </div>
+        <div>
+            <div style="font-size: 2.5rem;">📉</div>
+            <p>Minimal Re-Clustering</p>
+        </div>
+        <div>
+            <div style="font-size: 2.5rem;">⚡</div>
+            <p>Optimized Energy Balance</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

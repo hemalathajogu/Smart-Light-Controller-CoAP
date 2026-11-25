@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+    <div></div>
+    <div style="text-align: right;">
+        <span style="color: #4fc3f7; font-weight: bold; margin-right: 20px;">👤 {{ username }}</span>
+        <a href="/logout" style="background: #f44336; color: white; padding: 8px 16px; border-radius: 5px; text-decoration: none; font-weight: bold;">Logout</a>
+    </div>
+</div>
+
+<div class="card">
+    <h1 style="text-align: center; margin-bottom: 40px;">💡 Smart Light Controller Infrastructure</h1>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+        <div class="card" style="text-align: center; border-bottom: 5px solid #4a148c;">
+            <div style="font-size: 4rem; margin-bottom: 15px;">📡</div>
+            <h3>CoAP Gateway</h3>
+            <p>Acting as the central bridge for RESTful lighting controls.</p>
+        </div>
+
+        <div class="card" style="text-align: center; border-bottom: 5px solid #ffeb3b;">
+            <div style="font-size: 4rem; margin-bottom: 15px;">🏮</div>
+            <h3>Smart LED Node</h3>
+            <p>Constrained node with integrated REST interface for state control.</p>
+        </div>
+
+        <div class="card" style="text-align: center; border-bottom: 5px solid #2196f3;">
+            <div style="font-size: 4rem; margin-bottom: 15px;">📱</div>
+            <h3>User Interface</h3>
+            <p>Remote monitoring and lighting scene management dashboard.</p>
+        </div>
+
+        <div class="card" style="text-align: center; border-bottom: 5px solid #f44336;">
+            <div style="font-size: 4rem; margin-bottom: 15px;">🔋</div>
+            <h3>Energy Monitor</h3>
+            <p>Real-time power consumption tracking per lighting zone.</p>
+        </div>
+    </div>
+
+    <div class="card" style="background: #1a1a2e; color: #fff; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+        <h2 style="color: #4fc3f7;">Virtual Lighting Grid (CoAP Controlled)</h2>
+        <p>Current configuration: {{ nodes }} Nodes, {{ tx_power }} dBm Power</p>
+
+        <div id="simulation-box"
+            style="height: 500px; position: relative; border: 2px solid #4a148c; border-radius: 15px; background: #0f0f1b; overflow: hidden; margin-top: 20px; display: flex; align-items: center; justify-content: center;">
+            <div id="controller"
+                style="position: absolute; left: 5%; top: 50%; transform: translateY(-50%); text-align: center; z-index: 10;">
+                <div style="font-size: 3.5rem; filter: drop-shadow(0 0 10px #4fc3f7);">📡</div>
+                <small style="color: #4fc3f7; font-weight: bold;">CoAP Gateway</small>
+            </div>
+
+            <div id="nodes-grid"
+                style="display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); gap: 10px; width: 80%; height: 80%; margin-left: 10%;">
+                <!-- 10x10 Grid of Lights -->
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+            <div style="display: flex; gap: 10px; width: 100%; max-width: 600px;">
+                <input type="text" id="commandInput"
+                    placeholder="Enter any text or numbers (e.g., 'HAI', 'A100', 'HELLO')"
+                    style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #4fc3f7; background: #0f0f1b; color: #fff; font-size: 1rem;">
+                <button class="btn" id="execBtn" style="background: #4fc3f7; color: #0f0f1b; font-weight: bold;"
+                    onclick="runCustomCommand()">Execute AI Command</button>
+            </div>
+            <div id="ai-status" style="color: #4fc3f7; font-weight: bold; min-height: 24px;"></div>
+
+            <div style="text-align: center; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn" style="background: #00897b;" onclick="startCommunication()">System
+                    Broadcast</button>
+                <button class="btn" style="background: #7b1fa2;" onclick="drawPattern('A')">Pattern 'A'</button>
+                <button class="btn" style="background: #7b1fa2;" onclick="drawPattern('B')">Pattern 'B'</button>
+                <button class="btn" style="background: #7b1fa2;" onclick="drawPattern('C')">Pattern 'C'</button>
+                <button class="btn" style="background: #7b1fa2;" onclick="drawPattern('ZIGZAG')">Zig-Zag</button>
+                <button class="btn" style="background: #f44336;" onclick="clearGrid()">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flask Framework Documentation Section -->
+    <div class="card" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: #fff; border: 2px solid #ffd700; margin-top: 30px;">
+        <h2 style="text-align: center; color: #ffd700; margin-bottom: 30px;">🐍 Flask Framework Architecture & Operations</h2>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+            <!-- Flask Operation Flow -->
+            <div style="padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; border-left: 4px solid #4fc3f7;">
+                <h3 style="color: #4fc3f7; margin-bottom: 15px;">Flask Operation Flow</h3>
+                <div style="font-size: 0.95rem; line-height: 1.8;">
+                    <div style="padding: 10px; background: rgba(79, 195, 247, 0.2); border-radius: 5px; margin-bottom: 10px;">
+                        <strong>1. Request Reception</strong><br>
+                        Client sends HTTP/REST request to Flask application
+                    </div>
+                    <div style="padding: 10px; background: rgba(79, 195, 247, 0.2); border-radius: 5px; margin-bottom: 10px;">
+                        <strong>2. Route Matching</strong><br>
+                        URL routing engine matches request to handler function
+                    </div>
+                    <div style="padding: 10px; background: rgba(79, 195, 247, 0.2); border-radius: 5px; margin-bottom: 10px;">
+                        <strong>3. Request Processing</strong><br>
+                        Execute request handler with validation & CoAP/REST communication
+                    </div>
+                    <div style="padding: 10px; background: rgba(79, 195, 247, 0.2); border-radius: 5px; margin-bottom: 10px;">
+                        <strong>4. Response Generation</strong><br>
+                        Generate JSON/HTML response or render template
+                    </div>
+                    <div style="padding: 10px; background: rgba(79, 195, 247, 0.2); border-radius: 5px;">
+                        <strong>5. Response Delivery</strong><br>
+                        Send HTTP response back to client with status code
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flask Advantages -->
+            <div style="padding: 20px; background: rgba(255,255,255,0.1); border-radius: 10px; border-left: 4px solid #76ff03;">
+                <h3 style="color: #76ff03; margin-bottom: 15px;">Flask Framework Advantages</h3>
+                <ul style="list-style: none; padding: 0; font-size: 0.95rem; line-height: 2;">
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">✓ <strong>Lightweight & Modular</strong> - Minimal overhead, use only needed extensions</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">✓ <strong>RESTful Support</strong> - Native HTTP methods (GET, POST, PUT, DELETE) for REST APIs</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">✓ <strong>Easy Routing</strong> - Simple decorator-based URL routing system</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">✓ <strong>Template Rendering</strong> - Jinja2 templating for dynamic HTML generation</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">✓ <strong>Built-in Development Server</strong> - Quick testing and debugging</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">✓ <strong>JSON Support</strong> - Native JSON serialization/deserialization</li>
+                    <li style="padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.1);">✓ <strong>Error Handling</strong> - Comprehensive exception and error management</li>
+                    <li style="padding: 8px 0;">✓ <strong>Scalability</strong> - Can handle multiple concurrent requests with threading</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Flask Architecture Flowchart -->
+        <div style="padding: 25px; background: rgba(255,255,255,0.05); border-radius: 10px; border: 1px solid rgba(255,215,0,0.3); margin-bottom: 30px;">
+            <h3 style="text-align: center; color: #ffd700; margin-bottom: 25px;">Flask Request-Response Lifecycle</h3>
+            <div style="display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 15px; font-size: 0.9rem;">
+                <div style="padding: 12px 18px; background: #1976d2; border-radius: 8px; border: 2px solid #4fc3f7; min-width: 120px; text-align: center; font-weight: bold;">
+                    Client<br>Request
+                </div>
+                <div style="color: #4fc3f7; font-size: 1.5rem;">→</div>
+                <div style="padding: 12px 18px; background: #1565c0; border-radius: 8px; border: 2px solid #76ff03; min-width: 120px; text-align: center; font-weight: bold;">
+                    URL<br>Routing
+                </div>
+                <div style="color: #4fc3f7; font-size: 1.5rem;">→</div>
+                <div style="padding: 12px 18px; background: #0d47a1; border-radius: 8px; border: 2px solid #ff6b6b; min-width: 130px; text-align: center; font-weight: bold;">
+                    Handler<br>Execution
+                </div>
+                <div style="color: #4fc3f7; font-size: 1.5rem;">→</div>
+                <div style="padding: 12px 18px; background: #1565c0; border-radius: 8px; border: 2px solid #ffd700; min-width: 120px; text-align: center; font-weight: bold;">
+                    Response<br>Generation
+                </div>
+                <div style="color: #4fc3f7; font-size: 1.5rem;">→</div>
+                <div style="padding: 12px 18px; background: #1976d2; border-radius: 8px; border: 2px solid #4fc3f7; min-width: 120px; text-align: center; font-weight: bold;">
+                    Client<br>Response
+                </div>
+            </div>
+        </div>
+
+        <!-- Flask with CoAP Integration -->
+        <div style="padding: 20px; background: rgba(255,255,255,0.08); border-radius: 10px; border-left: 4px solid #ff6b6b;">
+            <h3 style="color: #ff6b6b; margin-bottom: 15px;">🔗 Flask Integration with CoAP Protocol</h3>
+            <p style="margin-bottom: 12px;">
+                Flask serves as the <strong>REST API gateway</strong> that bridges web clients with CoAP-enabled IoT nodes. It provides:
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <div style="padding: 15px; background: rgba(255,107,107,0.15); border-radius: 8px;">
+                    <strong style="color: #ff6b6b;">REST Endpoints</strong><br>
+                    <small>HTTP endpoints for light control, monitoring, and pattern generation</small>
+                </div>
+                <div style="padding: 15px; background: rgba(255,107,107,0.15); border-radius: 8px;">
+                    <strong style="color: #ff6b6b;">CoAP Communication</strong><br>
+                    <small>Translates REST requests to CoAP messages for constrained nodes</small>
+                </div>
+                <div style="padding: 15px; background: rgba(255,107,107,0.15); border-radius: 8px;">
+                    <strong style="color: #ff6b6b;">JSON Serialization</strong><br>
+                    <small>Handles data conversion between REST/JSON and CoAP formats</small>
+                </div>
+                <div style="padding: 15px; background: rgba(255,107,107,0.15); border-radius: 8px;">
+                    <strong style="color: #ff6b6b;">Session Management</strong><br>
+                    <small>Maintains client connections and request state</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Papers Reference -->
+        <div style="padding: 20px; background: rgba(255,255,255,0.08); border-radius: 10px; border-top: 3px solid #ffd700; margin-top: 25px;">
+            <h3 style="color: #ffd700; margin-bottom: 20px; text-align: center;">📚 Research Papers & References</h3>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div style="padding: 15px; background: rgba(255,215,0,0.1); border-radius: 8px; border-left: 4px solid #ffd700;">
+                    <h4 style="color: #ffd700; margin-bottom: 8px; margin-top: 0;">Paper 1: Flask Web Development Framework</h4>
+                    <p style="font-size: 0.85rem; margin: 0; line-height: 1.6;">
+                        <strong>Topic:</strong> Microframework Architecture & Design Patterns<br>
+                        <strong>Focus:</strong> RESTful API design, lightweight request handling, and scalability patterns for IoT applications
+                    </p>
+                </div>
+                <div style="padding: 15px; background: rgba(255,215,0,0.1); border-radius: 8px; border-left: 4px solid #ffd700;">
+                    <h4 style="color: #ffd700; margin-bottom: 8px; margin-top: 0;">Paper 2: CoAP-REST Gateway Implementation</h4>
+                    <p style="font-size: 0.85rem; margin: 0; line-height: 1.6;">
+                        <strong>Topic:</strong> Protocol Translation & IoT Integration<br>
+                        <strong>Focus:</strong> Flask-based gateway for bridging REST clients with CoAP constrained devices, performance optimization
+                    </p>
+                </div>
+            </div>
+            <div style="margin-top: 15px; padding: 12px; background: rgba(79, 195, 247, 0.15); border-radius: 6px; border-left: 3px solid #4fc3f7; font-size: 0.9rem;">
+                <strong style="color: #4fc3f7;">Implementation in This Project:</strong> Flask handles all REST API endpoints, routes user requests to CoAP nodes, manages the web UI, and provides real-time communication with the lighting grid system.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('nodes-grid');
+        const lights = [];
+        const statusEl = document.getElementById('ai-status');
+
+        // Initialize 10x10 Grid
+        for (let i = 0; i < 100; i++) {
+            const light = document.createElement('div');
+            light.className = 'light-node';
+            light.style.cssText = `
+            width: 100%; height: 100%; border-radius: 50%; background: #333; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 1.2rem; transition: all 0.3s ease; box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+            cursor: pointer;
+        `;
+            light.innerHTML = '●';
+            grid.appendChild(light);
+            lights.push(light);
+        }
+
+        function clearGrid() {
+            lights.forEach(l => {
+                l.style.background = '#333';
+                l.style.color = '#555';
+                l.style.textShadow = 'none';
+                l.style.boxShadow = 'inset 0 0 5px rgba(0,0,0,0.5)';
+            });
+        }
+
+        const BITMAP_FONT = {
+            'A': [24, 25, 33, 36, 42, 47, 51, 58, 61, 62, 63, 64, 65, 66, 67, 68, 71, 78, 81, 88],
+            'B': [12, 13, 14, 15, 22, 26, 32, 36, 42, 43, 44, 45, 52, 56, 62, 66, 72, 76, 82, 83, 84, 85],
+            'C': [13, 14, 15, 16, 22, 32, 42, 52, 62, 72, 83, 84, 85, 86],
+            'D': [12, 13, 14, 15, 22, 26, 32, 36, 42, 46, 52, 46, 52, 56, 62, 66, 72, 76, 82, 83, 84, 85],
+            'E': [12, 13, 14, 15, 16, 22, 32, 42, 43, 44, 45, 52, 62, 72, 82, 83, 84, 85, 86],
+            'F': [12, 13, 14, 15, 16, 22, 32, 42, 43, 44, 45, 52, 62, 72, 82],
+            'G': [13, 14, 15, 16, 22, 32, 42, 44, 45, 46, 52, 56, 62, 66, 72, 76, 83, 84, 85, 86],
+            'H': [12, 17, 22, 27, 32, 37, 42, 43, 44, 45, 46, 47, 52, 57, 62, 67, 72, 77, 82, 87],
+            'I': [13, 14, 15, 24, 34, 44, 54, 64, 74, 83, 84, 85],
+            'J': [15, 16, 17, 26, 36, 46, 56, 66, 72, 76, 83, 84, 85],
+            'K': [12, 17, 22, 26, 32, 35, 42, 43, 44, 52, 53, 54, 62, 65, 72, 76, 82, 87],
+            'L': [12, 22, 32, 42, 52, 62, 72, 82, 83, 84, 85, 86],
+            'M': [12, 18, 22, 23, 27, 28, 32, 34, 36, 38, 42, 45, 48, 52, 58, 62, 68, 72, 78, 82, 88],
+            'N': [12, 18, 22, 23, 28, 32, 34, 28, 32, 34, 38, 42, 45, 48, 52, 56, 58, 62, 67, 68, 72, 78, 82, 88],
+            'O': [13, 14, 15, 16, 22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77, 83, 84, 85, 86],
+            'P': [12, 13, 14, 15, 22, 26, 32, 36, 42, 43, 44, 45, 52, 62, 72, 82],
+            'Q': [13, 14, 15, 16, 22, 27, 32, 37, 42, 47, 52, 55, 57, 62, 66, 67, 72, 77, 83, 84, 85, 86, 88],
+            'R': [12, 13, 14, 15, 22, 26, 32, 36, 42, 43, 44, 45, 52, 54, 62, 65, 72, 76, 82, 87],
+            'S': [13, 14, 15, 16, 22, 32, 43, 44, 45, 56, 66, 76, 82, 83, 84, 85],
+            'T': [12, 13, 14, 15, 16, 17, 24, 25, 34, 35, 44, 45, 54, 55, 64, 65, 74, 75, 84, 85],
+            'U': [12, 17, 22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77, 83, 84, 85, 86],
+            'V': [12, 18, 22, 28, 32, 38, 42, 48, 53, 57, 63, 67, 74, 76, 85],
+            'W': [12, 18, 22, 28, 32, 38, 42, 45, 48, 52, 55, 58, 62, 63, 67, 68, 72, 78, 82, 88],
+            'X': [12, 18, 23, 27, 34, 36, 45, 55, 64, 66, 73, 77, 82, 88],
+            'Y': [12, 18, 22, 28, 33, 37, 44, 46, 55, 65, 75, 85],
+            'Z': [12, 13, 14, 15, 16, 17, 27, 36, 45, 54, 63, 72, 82, 83, 84, 85, 86, 87],
+            '0': [13, 14, 15, 16, 22, 27, 32, 37, 42, 47, 52, 57, 62, 67, 72, 77, 83, 84, 85, 86],
+            '1': [14, 23, 24, 34, 44, 54, 64, 74, 83, 84, 85],
+            '2': [13, 14, 15, 16, 22, 27, 37, 46, 55, 64, 73, 82, 82, 83, 84, 85, 86, 87],
+            '3': [13, 14, 15, 16, 27, 37, 44, 45, 46, 57, 67, 77, 83, 84, 85, 86],
+            '4': [16, 25, 26, 34, 36, 43, 46, 52, 53, 54, 55, 56, 57, 66, 76, 86],
+            '5': [12, 13, 14, 15, 16, 22, 32, 42, 43, 44, 45, 56, 66, 76, 82, 83, 84, 85],
+            '6': [13, 14, 15, 16, 22, 32, 42, 43, 44, 45, 52, 56, 62, 66, 72, 76, 83, 84, 85, 86],
+            '7': [12, 13, 14, 15, 16, 17, 27, 36, 45, 54, 63, 72, 82],
+            '8': [13, 14, 15, 16, 22, 27, 32, 37, 43, 44, 45, 52, 57, 62, 67, 72, 77, 83, 84, 85, 86],
+            '9': [13, 14, 15, 16, 22, 26, 32, 36, 43, 44, 45, 46, 56, 66, 76, 83, 84, 85]
+        };
+
+        async function runCustomCommand() {
+            const input = document.getElementById('commandInput').value.toUpperCase().trim();
+            if (!input) return;
+
+            statusEl.innerText = "CoAP Gateway sending AI request...";
+            const btn = document.getElementById('execBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+
+            // Sequential processing for alphanumeric strings
+            if (input.length > 0 && /^[A-Z0-9 ]+$/.test(input)) {
+                for (let i = 0; i < input.length; i++) {
+                    const char = input[i];
+                    if (char === ' ') {
+                        clearGrid();
+                        await new Promise(r => setTimeout(r, 800));
+                        continue;
+                    }
+                    statusEl.innerText = `Displaying '${char}' (${i + 1}/${input.length})...`;
+                    await new Promise(resolve => {
+                        drawPattern(char);
+                        setTimeout(resolve, 1500);
+                    });
+                }
+                statusEl.innerText = "Sequence execution finished.";
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                return;
+            }
+
+            // High-fidelity local shapes
+            const localShapes = ['CIRCLE', 'SQUARE', 'TRIANGLE', 'POLYGON', 'ZIGZAG'];
+            if (localShapes.includes(input)) {
+                drawPattern(input);
+                statusEl.innerText = `Local high-fidelity pattern applied for '${input}'.`;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                return;
+            }
+
+            // Arbitrary pattern via AI (Fallback)
+            try {
+                const response = await fetch('/api/generate_pattern', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: input.toLowerCase() })
+                });
+
+                const data = await response.json();
+                if (data.indices && data.indices.length > 0) {
+                    clearGrid();
+                    statusEl.innerText = `AI response received. Mapping '${input}' to lighting grid...`;
+                    data.indices.forEach((idx, i) => {
+                        if (idx >= 0 && idx < 100) {
+                            setTimeout(() => communicateWithLight(idx), i * 30);
+                        }
+                    });
+                    setTimeout(() => { statusEl.innerText = "Dynamic pattern applied."; }, data.indices.length * 30 + 500);
+                } else {
+                    statusEl.innerText = data.error || "AI could not determine a pattern for that request.";
+                }
+            } catch (error) {
+                statusEl.innerText = "Communication failure with AI service.";
+            } finally {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        }
+
+        function drawPattern(type) {
+            clearGrid();
+            let patternIndices = [];
+
+            if (BITMAP_FONT[type]) {
+                patternIndices = BITMAP_FONT[type];
+            } else if (type === 'ZIGZAG') {
+                for (let i = 0; i < 10; i++) {
+                    patternIndices.push(i * 10 + i);
+                    if (i < 9) patternIndices.push(i * 10 + (i + 1));
+                }
+            } else if (type === 'CIRCLE') {
+                const centerX = 4.5, centerY = 4.5, radius = 4;
+                for (let i = 0; i < 100; i++) {
+                    const x = i % 10, y = Math.floor(i / 10);
+                    const dist = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
+                    if (Math.abs(dist - radius) < 0.6) patternIndices.push(i);
+                }
+            } else if (type === 'SQUARE') {
+                for (let i = 0; i < 100; i++) {
+                    const x = i % 10, y = Math.floor(i / 10);
+                    if ((x >= 2 && x <= 7 && (y === 2 || y === 7)) || (y >= 2 && y <= 7 && (x === 2 || x === 7))) {
+                        patternIndices.push(i);
+                    }
+                }
+            } else if (type === 'TRIANGLE') {
+                patternIndices = [4, 5, 13, 16, 22, 27, 31, 38, 40, 41, 49, 50, 59, 60, 69, 70, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89];
+            } else if (type === 'POLYGON') {
+                patternIndices = [13, 14, 15, 16, 22, 27, 31, 38, 41, 48, 51, 58, 61, 68, 72, 77, 83, 84, 85, 86];
+            }
+
+            patternIndices.forEach((idx, i) => {
+                if (lights[idx]) {
+                    setTimeout(() => communicateWithLight(idx), i * 30);
+                }
+            });
+        }
+
+        function communicateWithLight(idx) {
+            const light = lights[idx];
+            const rect = light.getBoundingClientRect();
+            const boxRect = document.getElementById('simulation-box').getBoundingClientRect();
+
+            // Pulse effect from gateway
+            const pulse = document.createElement('div');
+            pulse.style.cssText = `
+            position: absolute; left: 7%; top: 50%; width: 5px; height: 5px;
+            background: #4fc3f7; border-radius: 50%; z-index: 5;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 0 10px #4fc3f7;
+        `;
+            document.getElementById('simulation-box').appendChild(pulse);
+
+            setTimeout(() => {
+                pulse.style.left = (rect.left - boxRect.left + rect.width / 2) + 'px';
+                pulse.style.top = (rect.top - boxRect.top + rect.height / 2) + 'px';
+                pulse.style.opacity = '0';
+            }, 10);
+
+            setTimeout(() => {
+                light.style.background = '#ffeb3b';
+                light.style.color = '#fff';
+                light.style.textShadow = '0 0 15px #ffeb3b, 0 0 30px #fbc02d';
+                light.style.boxShadow = '0 0 20px #ffeb3b';
+                pulse.remove();
+            }, 500);
+        }
+
+        function startCommunication() {
+            clearGrid();
+            const nodeCount = parseInt('{{ nodes }}') || 30;
+            const count = Math.min(100, nodeCount);
+            for (let i = 0; i < count; i++) {
+                const randomIdx = Math.floor(Math.random() * 100);
+                setTimeout(() => communicateWithLight(randomIdx), i * 100);
+            }
+        }
+
+        window.onload = startCommunication;
+    </script>
+</div>
+{% endblock %}

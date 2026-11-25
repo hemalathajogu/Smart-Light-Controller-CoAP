@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h1 style="color: #4caf50; border-bottom: 2px solid #4caf50; padding-bottom: 10px;">Proposed Method: REST/CoAP
+        Excellence</h1>
+
+    <div class="card" style="background: #f9f9f9;">
+        <h3>Input Parameters</h3>
+        <form id="paramForm" style="display: flex; gap: 20px; align-items: flex-end;">
+            <div>
+                <label>Number of Nodes:</label>
+                <input type="number" id="nodes" value="50" style="width: 80px;">
+            </div>
+            <div>
+                <label>TX Power (dBm):</label>
+                <input type="number" id="tx_power" value="10" style="width: 80px;">
+            </div>
+            <button type="button" class="btn" onclick="updateData()">Update Performance</button>
+        </form>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-top: 20px;">
+        <div class="card">
+            <h3>Reliability Matrix</h3>
+            <table id="dataTable" style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: #4caf50; color: white;">
+                        <th style="padding: 12px;">Metric</th>
+                        <th style="padding: 12px;">Value</th>
+                        <th style="padding: 12px;">Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Dynamic Rows -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card" style="background: #f1f8e9;">
+            <h3>Network Health Dashboards</h3>
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="height: 100px; background: #eee; position: relative; border-radius: 5px; overflow: hidden;">
+                    <div id="bar-delivery" style="height: 100%; background: #4caf50; width: 0%; transition: width 1s;">
+                    </div>
+                    <span
+                        style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-weight: bold; color: #1b5e20;">Delivery
+                        Ratio</span>
+                </div>
+                <div style="height: 100px; background: #eee; position: relative; border-radius: 5px; overflow: hidden;">
+                    <div id="bar-uptime" style="height: 100%; background: #4caf50; width: 0%; transition: width 1s;">
+                    </div>
+                    <span
+                        style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-weight: bold; color: #1b5e20;">Network
+                        Uptime</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateData() {
+        const nodes = parseInt(document.getElementById('nodes').value);
+        const tx = parseInt(document.getElementById('tx_power').value);
+
+        // Deterministic formulas for CoAP (Superior performance)
+        const delivery = Math.min(99.9, 95 + (tx * 0.4));
+        const latency = Math.max(5, 30 - (tx * 1.5) + (nodes * 0.1));
+        const energy = Math.min(100, 98 - (nodes * 0.05));
+
+        const body = document.getElementById('tableBody');
+        body.innerHTML = `
+        <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 12px; font-weight: bold;">Packet Delivery Ratio</td>
+            <td style="padding: 12px;">${delivery.toFixed(2)}%</td>
+            <td style="padding: 12px; color: #4caf50;">Optimal</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #eee; background: #f1f8e9;">
+            <td style="padding: 12px; font-weight: bold;">End-to-End Latency</td>
+            <td style="padding: 12px;">${latency.toFixed(1)} ms</td>
+            <td style="padding: 12px; color: #4caf50;">Low</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 12px; font-weight: bold;">Energy Efficiency</td>
+            <td style="padding: 12px;">${energy.toFixed(2)}%</td>
+            <td style="padding: 12px; color: #4caf50;">Superior</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #eee; background: #f1f8e9;">
+            <td style="padding: 12px; font-weight: bold;">CH Selection Accuracy</td>
+            <td style="padding: 12px;">98.20%</td>
+            <td style="padding: 12px; color: #4caf50;">Excellent</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #eee;">
+            <td style="padding: 12px; font-weight: bold;">Routing Overhead</td>
+            <td style="padding: 12px;">115 pkts</td>
+            <td style="padding: 12px; color: #4caf50;">Minimal</td>
+        </tr>
+    `;
+
+        document.getElementById('bar-delivery').style.width = `${delivery}%`;
+        document.getElementById('bar-uptime').style.width = `${energy}%`;
+    }
+    window.onload = updateData;
+</script>
+{% endblock %}

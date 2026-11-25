@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="card">
+    <h2>Network Simulation</h2>
+
+    <div style="display:flex; gap:20px;">
+        <div>
+            <label>Number of Nodes:</label>
+            <input type="number" id="nodeCount" value="15">
+            <button class="btn" onclick="generateNetwork()">Generate Canvas</button>
+        </div>
+        <div>
+            <label>Source:</label>
+            <input type="number" id="sourceNode" value="0" style="width:60px;">
+            <label>Destination:</label>
+            <input type="number" id="destNode" value="5" style="width:60px;">
+            <button class="btn" onclick="findPath()">Transmit Data</button>
+        </div>
+    </div>
+
+    <div style="margin-top:20px; position:relative;">
+        <canvas id="networkCanvas" width="1000" height="500"></canvas>
+    </div>
+
+    <div id="status" style="margin-top:10px; font-weight:bold;"></div>
+</div>
+
+<script>
+let networkData = null;
+const canvas = document.getElementById("networkCanvas");
+const ctx = canvas.getContext("2d");
+
+function safeArray(x) {
+    return Array.isArray(x) ? x : [];
+}
+
+async function generateNetwork() {
+    const nodes = document.getElementById("nodeCount").value;
+    const res = await fetch("/api/generate_network", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({nodes})
+    });
+    networkData = await res.json();
+    draw();
+}
+
+function draw(paths = null) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    networkData.edges.forEach(e => {
+        const s = networkData.nodes.find(n => n.id === e.source);
+        const t = networkData.nodes.find(n => n.id === e.target);
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(t.x, t.y);
+        ctx.strokeStyle = "#eee";
+        ctx.stroke();
+    });
+
+    if (paths) {
+        const aodvPath = safeArray(paths.path_aodv);
+        const coapPath = safeArray(paths.path_coap);
+
+        ctx.setLineDash([8,4]);
+        drawPath(aodvPath, "#ff0000", 3);
+        ctx.setLineDash([]);
+        drawPath(coapPath, "#00c853", 5);
+    }
+
+    const chAODV = paths ? safeArray(paths.ch_aodv) : [];
+    const chCoAP = paths ? safeArray(paths.ch_coap) : [];
+
+    networkData.nodes.forEach(n => {
+        const isCH = chAODV.includes(n.id) || chCoAP.includes(n.id);
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, isCH ? 18 : 12, 0, Math.PI*2);
+        ctx.fillStyle = isCH ? "#4caf50" : "#4a148c";
+        ctx.fill();
+        ctx.fillStyle = "white";
+        ctx.fillText(n.id, n.x, n.y);
+    });
+}
+
+function drawPath(path, color, width) {
+    if (path.length < 2) return;
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    const s = networkData.nodes.find(n => n.id === path[0]);
+    ctx.moveTo(s.x, s.y);
+    for (let i=1;i<path.length;i++){
+        const t = networkData.nodes.find(n => n.id === path[i]);
+        ctx.lineTo(t.x, t.y);
+    }
+    ctx.stroke();
+}
+
+async function findPath() {
+    const source = parseInt(document.getElementById("sourceNode").value);
+    const target = parseInt(document.getElementById("destNode").value);
+
+    const res = await fetch("/api/calculate_path", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({...networkData, source, target})
+    });
+
+    const paths = await res.json();
+    if (paths.error) {
+        alert(paths.error);
+        return;
+    }
+
+    draw(paths);
+
+    const aodv = safeArray(paths.path_aodv).length;
+    const coap = safeArray(paths.path_coap).length;
+    document.getElementById("status").innerText =
+        `Path found! Existing: ${aodv} hops, Proposed: ${coap} hops`;
+}
+
+window.onload = generateNetwork;
+</script>
+
+{% endblock %}
